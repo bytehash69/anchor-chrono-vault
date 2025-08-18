@@ -4,7 +4,7 @@ use anchor_spl::{
     token::{Mint, Token, TokenAccount},
 };
 
-use crate::Chrono;
+use crate::{Chrono, Errors};
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -51,6 +51,8 @@ impl<'info> Initialize<'info> {
         token_mint: Pubkey,
         bumps: &InitializeBumps,
     ) -> Result<()> {
+        require!(lock_duration > 0, Errors::InvalidTime);
+
         let clock = Clock::get()?;
         let current_time = clock.unix_timestamp as u64;
         let unlock_time = current_time + lock_duration;

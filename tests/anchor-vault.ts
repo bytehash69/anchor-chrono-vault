@@ -76,12 +76,13 @@ describe("anchor-vault", () => {
     console.log("Vault ATA:", vault.toBase58());
   });
 
+  
   it("Initialized vault", async () => {
-    const lockDuration = new anchor.BN(5);
-
+    const lockDuration = new anchor.BN(2);
+    
     const tx = await program.methods
-      .initialize(lockDuration, mint)
-      .accounts({
+    .initialize(lockDuration, mint)
+    .accounts({
         user: user.publicKey,
         mint: mint,
         userAta: userTokenAccount,
@@ -89,12 +90,34 @@ describe("anchor-vault", () => {
         vault: vault,
       })
       .rpc();
+      
+      console.log("Transaction signature (initialize): ", tx);
+    });
+    
+    it("Should fail due to invalid time duration", async () => {
+      const lockDuration = new anchor.BN(-1);
+  
+      try {
+        const tx = await program.methods
+        .initialize(lockDuration, mint)
+        .accounts({
+          user: user.publicKey,
+          mint: mint,
+          userAta: userTokenAccount,
+          chronoAccount: chrono,
+          vault: vault,
+        })
+        .rpc();
+        
+        console.log("Transaction signature (initialize): ", tx);
+        expect.fail("Should fail when invalid lock duration given");
+      } catch (error) {
 
-    console.log("Transaction signature (initialize): ", tx);
-  });
+      }
+    });
 
-  it("Transfer amount to vault", async () => {
-    const tx = await program.methods
+    it("Transfer amount to vault", async () => {
+      const tx = await program.methods
       .deposit(amount)
       .accounts({
         user: user.publicKey,
@@ -126,16 +149,18 @@ describe("anchor-vault", () => {
       .rpc();
       expect.fail("Should fail cause vault is locked yet");
     } catch (error) {
-      console.log("Withdrawal rejected before unlock time")
+      console.log("Some thing went wrong")
     }
   })
 
   it("Transfer amount to vault after vault unlocks", async () => {
 
+    console.log("Waiting to pass time .....");
+
     await new Promise((res:any) => {
       setTimeout(()=>{
         res("");
-      }, 6000)
+      }, 2000)
     })
 
     const tx = await program.methods

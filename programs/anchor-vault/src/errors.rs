@@ -4,4 +4,6 @@ use anchor_lang::prelude::*;
 pub enum Errors {
     #[msg("Lock time is not completed yet")]
     TokensStillLocked,
+    #[msg("Invalid time")]
+    InvalidTime,
 }
